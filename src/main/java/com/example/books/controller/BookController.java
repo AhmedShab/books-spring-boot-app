@@ -1,6 +1,12 @@
 package com.example.books.controller;
 
 import org.springframework.web.bind.annotation.RestController;
+
+import com.example.books.entity.Book;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -8,9 +14,25 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RestController
 public class BookController {
 
-    @GetMapping("/api")
-    public String firstAPI() {
-        return "Hello Ahmed";
+    private final List<Book> books = new ArrayList<>();
+
+    public BookController() {
+        initializeBooks();
+    }
+
+    private void initializeBooks() {
+        books.addAll(List.of(
+            new Book("The Great Gatsby", "F. Scott Fitzgerald", "Fiction"),
+            new Book("To Kill a Mockingbird", "Harper Lee", "Fiction"),
+            new Book("1984", "George Orwell", "Dystopian"),
+            new Book("A Brief History of Time", "Stephen Hawking", "Science"),
+            new Book("The Art of War", "Sun Tzu", "Philosophy")
+        ));
+    }
+
+    @GetMapping("/api/books")
+    public List<Book> getBooks() {
+        return books;
     }
     
 }
