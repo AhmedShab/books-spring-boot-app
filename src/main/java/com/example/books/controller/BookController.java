@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -19,7 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/books")
 public class BookController {
     private static final Logger logger = LoggerFactory.getLogger(BookController.class);
 
@@ -39,7 +40,7 @@ public class BookController {
         ));
     }
 
-    @GetMapping("/books")
+    @GetMapping("/")
     public List<Book> getBookByCategory(@RequestParam(required = false) String category) {
         if (category == null || category.isEmpty()) {
             return books;
@@ -50,7 +51,7 @@ public class BookController {
                 .toList();
     }
 
-    @GetMapping("/books/{title}")
+    @GetMapping("/{title}")
     public Book getBookByTitle(@PathVariable String title) {
         return books.stream()
                 .filter(book -> book.getTitle().equalsIgnoreCase(title))
@@ -58,7 +59,7 @@ public class BookController {
                 .orElse(null);
     }
 
-    @PostMapping("/books")
+    @PostMapping("/")
     public void postBook(@RequestBody Book newBook) {
         books.stream()
              .filter(b -> b.getTitle().equalsIgnoreCase(newBook.getTitle()))
@@ -70,12 +71,17 @@ public class BookController {
         books.add(newBook);
     }
 
-    @PutMapping("books/{id}")
+    @PutMapping("/{id}")
     public void putBook(@PathVariable Integer id, @RequestBody String newTitle) {
          Optional<Book> updateBook = books.stream()
             .filter(book -> book.getId() == id)
             .findFirst();
 
             updateBook.ifPresent(b -> b.setTitle(newTitle));
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteBook(@PathVariable Integer id) {
+        books.removeIf(book -> book.getId() == id);
     }
 }
