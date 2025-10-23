@@ -1,21 +1,33 @@
 package com.example.books.entity;
 
 public class Book {
-    // I want to auto generate id
-    private static int idCounter = 0;
-    private Integer id;
+    private long id;
     private String title;
     private String author;
     private String category;
+    private int rating;
 
-    public Book(String title, String author, String category) {
-        this.id = ++idCounter;
+    public Book(long id, String title, String author, String category, int rating) {
+        this.id = id;
         this.title = title;
         this.author = author;
         this.category = category;
+        this.rating = rating;
     }
 
-    public Integer getId() {
+    public int getRating() {
+        return rating;
+    }
+
+    public void setRating(int rating) {
+        this.rating = rating;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public long getId() {
         return id;
     }
 
