@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.books.entity.Book;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.util.ArrayList;
@@ -45,7 +46,10 @@ public class BookController {
     @Operation(summary = "Get all books", description = "Retrieve a list of all available books")
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/")
-    public List<Book> getBooks(@RequestParam(required = false) String category) {
+    public List<Book> getBooks(
+            @Parameter(description = "Optional query param", required = false)
+            @RequestParam(required = false) String category
+        ) {
         if (category == null) {
             return books;
         }
@@ -58,7 +62,9 @@ public class BookController {
     @Operation(summary = "Get a book by Id", description = "Retrieve a specific book by Id")
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/{id}")
-    public Book getBookById(@PathVariable long id) {
+    public Book getBookById(
+                            @Parameter(description = "Id of book to be retrieved") 
+                            @PathVariable long id) {
         return books.stream()
                 .filter(book -> book.getId() == id)
                 .findFirst()
@@ -93,7 +99,10 @@ public class BookController {
     @Operation(summary = "Delete a book", description = "Remove a book from the list")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
-    public void deleteBook(@PathVariable long id) {
+    public void deleteBook(
+            @Parameter(description = "Id of the book to delete")
+            @PathVariable long id
+        ) {
         books.removeIf(book -> book.getId() == id);
     }
 }
