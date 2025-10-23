@@ -10,9 +10,14 @@ import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+
 
 
 @RestController
+@RequestMapping("/api")
 public class BookController {
 
     private final List<Book> books = new ArrayList<>();
@@ -31,7 +36,7 @@ public class BookController {
         ));
     }
 
-    @GetMapping("/api/books")
+    @GetMapping("/books")
     public List<Book> getBookByCategory(@RequestParam(required = false) String category) {
         if (category == null || category.isEmpty()) {
             return books;
@@ -42,11 +47,24 @@ public class BookController {
                 .toList();
     }
 
-    @GetMapping("/api/books/{title}")
+    @GetMapping("/books/{title}")
     public Book getBookByTitle(@PathVariable String title) {
         return books.stream()
                 .filter(book -> book.getTitle().equalsIgnoreCase(title))
                 .findFirst()
                 .orElse(null);
     }
+
+    @PostMapping("/books")
+    public void postBook(@RequestBody Book newBook) {
+        books.stream()
+             .filter(b -> b.getTitle().equalsIgnoreCase(newBook.getTitle()))
+             .findFirst()
+             .ifPresent(existingBook -> {
+                 return;
+             });
+
+        books.add(newBook);
+    }
+    
 }
