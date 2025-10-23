@@ -7,6 +7,7 @@ import com.example.books.entity.Book;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Min;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,7 +65,7 @@ public class BookController {
     @GetMapping("/{id}")
     public Book getBookById(
                             @Parameter(description = "Id of book to be retrieved") 
-                            @PathVariable long id) {
+                            @PathVariable @Min(value = 1) long id) {
         return books.stream()
                 .filter(book -> book.getId() == id)
                 .findFirst()
@@ -88,7 +89,7 @@ public class BookController {
     @Operation(summary = "Update a book", description = "Update the details of an existing book")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PutMapping("/{id}")
-    public void putBook(@PathVariable long id, @RequestBody String newTitle) {
+    public void putBook(@PathVariable @Min(value = 1) long id, @RequestBody String newTitle) {
          Optional<Book> updateBook = books.stream()
             .filter(book -> book.getId() == id)
             .findFirst();
@@ -101,7 +102,7 @@ public class BookController {
     @DeleteMapping("/{id}")
     public void deleteBook(
             @Parameter(description = "Id of the book to delete")
-            @PathVariable long id
+            @PathVariable @Min(value = 1) long id
         ) {
         books.removeIf(book -> book.getId() == id);
     }
