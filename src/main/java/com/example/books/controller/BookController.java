@@ -3,6 +3,7 @@ package com.example.books.controller;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.books.entity.Book;
+import com.example.books.request.BookRequest;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -11,7 +12,6 @@ import jakarta.validation.constraints.Min;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -75,27 +75,25 @@ public class BookController {
     @Operation(summary = "Create a new book", description = "Add a new book to the list")
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/")
-    public void postBook(@RequestBody Book newBook) {
-        books.stream()
-             .filter(b -> b.getTitle().equalsIgnoreCase(newBook.getTitle()))
-             .findFirst()
-             .ifPresent(existingBook -> {
-                 return;
-             });
+    public void postBook(@RequestBody BookRequest newBook) {
+        long id = books.isEmpty() ? 1 : books.get(books.size() - 1).getId() + 1;
 
-        books.add(newBook);
+        Book book = convertToBook(id, newBook);
+        books.add(book);
     }
 
     @Operation(summary = "Update a book", description = "Update the details of an existing book")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PutMapping("/{id}")
-    public void putBook(@PathVariable @Min(value = 1) long id, @RequestBody String newTitle) {
-         Optional<Book> updateBook = books.stream()
-            .filter(book -> book.getId() == id)
-            .findFirst();
-
-            updateBook.ifPresent(b -> b.setTitle(newTitle));
-    }
+    public void putBook(@PathVariable @Min(value = 1) long id, @RequestBody BookRequest requestBook) {
+         for (int i = 0; i < books.size(); i++) {
+            if (books.get(i).getId() == id) {
+                Book updatedBook = convertToBook(id, requestBook);
+                books.set(i, updatedBook);
+                return;
+            }
+         }
+     }
 
     @Operation(summary = "Delete a book", description = "Remove a book from the list")
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -105,5 +103,15 @@ public class BookController {
             @PathVariable @Min(value = 1) long id
         ) {
         books.removeIf(book -> book.getId() == id);
+    }
+
+    private Book convertToBook(long id, BookRequest bookRequest) {
+        return new Book(
+            id,
+            bookRequest.getTitle(),
+            bookRequest.getAuthor(),
+            bookRequest.getCategory(),
+            bookRequest.getRating()   
+        );
     }
 }
