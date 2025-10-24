@@ -8,6 +8,7 @@ import com.example.books.request.BookRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 
 import java.util.ArrayList;
@@ -36,21 +37,18 @@ public class BookController {
 
     private void initializeBooks() {
         books.addAll(List.of(
-            new Book(1, "The Great Gatsby", "F. Scott Fitzgerald", "Fiction", 3),
-            new Book(2, "To Kill a Mockingbird", "Harper Lee", "Fiction", 10),
-            new Book(3, "1984", "George Orwell", "Dystopian", 9),
-            new Book(4, "A Brief History of Time", "Stephen Hawking", "Science", 8),
-            new Book(5, "The Art of War", "Sun Tzu", "Philosophy", 7)
-        ));
+                new Book(1, "The Great Gatsby", "F. Scott Fitzgerald", "Fiction", 3),
+                new Book(2, "To Kill a Mockingbird", "Harper Lee", "Fiction", 10),
+                new Book(3, "1984", "George Orwell", "Dystopian", 9),
+                new Book(4, "A Brief History of Time", "Stephen Hawking", "Science", 8),
+                new Book(5, "The Art of War", "Sun Tzu", "Philosophy", 7)));
     }
 
     @Operation(summary = "Get all books", description = "Retrieve a list of all available books")
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/")
     public List<Book> getBooks(
-            @Parameter(description = "Optional query param", required = false)
-            @RequestParam(required = false) String category
-        ) {
+            @Parameter(description = "Optional query param", required = false) @RequestParam(required = false) String category) {
         if (category == null) {
             return books;
         }
@@ -64,8 +62,7 @@ public class BookController {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/{id}")
     public Book getBookById(
-                            @Parameter(description = "Id of book to be retrieved") 
-                            @PathVariable @Min(value = 1) long id) {
+            @Parameter(description = "Id of book to be retrieved") @PathVariable @Min(value = 1) long id) {
         return books.stream()
                 .filter(book -> book.getId() == id)
                 .findFirst()
@@ -75,7 +72,7 @@ public class BookController {
     @Operation(summary = "Create a new book", description = "Add a new book to the list")
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/")
-    public void postBook(@RequestBody BookRequest newBook) {
+    public void postBook(@Valid @RequestBody BookRequest newBook) {
         long id = books.isEmpty() ? 1 : books.get(books.size() - 1).getId() + 1;
 
         Book book = convertToBook(id, newBook);
@@ -85,33 +82,30 @@ public class BookController {
     @Operation(summary = "Update a book", description = "Update the details of an existing book")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PutMapping("/{id}")
-    public void putBook(@PathVariable @Min(value = 1) long id, @RequestBody BookRequest requestBook) {
-         for (int i = 0; i < books.size(); i++) {
+    public void putBook(@PathVariable @Min(value = 1) long id, @Valid @RequestBody BookRequest requestBook) {
+        for (int i = 0; i < books.size(); i++) {
             if (books.get(i).getId() == id) {
                 Book updatedBook = convertToBook(id, requestBook);
                 books.set(i, updatedBook);
                 return;
             }
-         }
-     }
+        }
+    }
 
     @Operation(summary = "Delete a book", description = "Remove a book from the list")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
     public void deleteBook(
-            @Parameter(description = "Id of the book to delete")
-            @PathVariable @Min(value = 1) long id
-        ) {
+            @Parameter(description = "Id of the book to delete") @PathVariable @Min(value = 1) long id) {
         books.removeIf(book -> book.getId() == id);
     }
 
     private Book convertToBook(long id, BookRequest bookRequest) {
         return new Book(
-            id,
-            bookRequest.getTitle(),
-            bookRequest.getAuthor(),
-            bookRequest.getCategory(),
-            bookRequest.getRating()   
-        );
+                id,
+                bookRequest.getTitle(),
+                bookRequest.getAuthor(),
+                bookRequest.getCategory(),
+                bookRequest.getRating());
     }
 }
