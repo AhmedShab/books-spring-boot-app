@@ -3,7 +3,6 @@ package com.example.books.controller;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.books.entity.Book;
-import com.example.books.exception.BookErrorResponse;
 import com.example.books.exception.BookNotFoundException;
 import com.example.books.request.BookRequest;
 
@@ -17,9 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -86,14 +83,16 @@ public class BookController {
     @Operation(summary = "Update a book", description = "Update the details of an existing book")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PutMapping("/{id}")
-    public void putBook(@PathVariable @Min(value = 1) long id, @Valid @RequestBody BookRequest requestBook) {
+    public Book putBook(@PathVariable @Min(value = 1) long id, @Valid @RequestBody BookRequest requestBook) {
         for (int i = 0; i < books.size(); i++) {
             if (books.get(i).getId() == id) {
                 Book updatedBook = convertToBook(id, requestBook);
                 books.set(i, updatedBook);
-                return;
+                return updatedBook;
             }
         }
+
+        throw new BookNotFoundException("Book not found with id: " + id);
     }
 
     @Operation(summary = "Delete a book", description = "Remove a book from the list")
@@ -101,6 +100,11 @@ public class BookController {
     @DeleteMapping("/{id}")
     public void deleteBook(
             @Parameter(description = "Id of the book to delete") @PathVariable @Min(value = 1) long id) {
+        books.stream()
+                .filter(book -> book.getId() == id)
+                .findFirst()
+                .orElseThrow(() -> new BookNotFoundException("Book not found with id: " + id));
+        
         books.removeIf(book -> book.getId() == id);
     }
 
@@ -111,16 +115,5 @@ public class BookController {
                 bookRequest.getAuthor(),
                 bookRequest.getCategory(),
                 bookRequest.getRating());
-    }
-
-    @ExceptionHandler
-    public ResponseEntity<BookErrorResponse> handleException(BookNotFoundException exc) {
-        BookErrorResponse bookErrorResponse = new BookErrorResponse(
-            HttpStatus.NOT_FOUND.value(),
-            exc.getMessage(),
-            System.currentTimeMillis()
-        );
-
-        return new ResponseEntity<>(bookErrorResponse, HttpStatus.NOT_FOUND);
     }
 }
